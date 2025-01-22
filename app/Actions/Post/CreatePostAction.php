@@ -26,7 +26,7 @@ class CreatePostAction {
     public function execute($userId, $requestData): Post
     {
         $post = $this->postService->createPost(array_merge(
-            $requestData->only(['title', 'subtitle', 'body', 'published']),
+            $requestData->only(['title', 'subtitle', 'body', 'published', 'publish_date']),
             ['user_id' => $userId]
         ));
 

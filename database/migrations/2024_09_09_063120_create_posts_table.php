@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('thumbnail_id')->nullable();
             $table->text('body');
             $table->tinyInteger('published')->default(0);
+            $table->date('publish_date')->nullable();
             $table->timestamps();
         });
     }

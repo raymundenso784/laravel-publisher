@@ -149,4 +149,92 @@ class ValidationTest extends TestCase
             'published' => ['The selected published is invalid.'],
         ]);
     }
+
+    public function test_invalid_publish_date_string_with_thumbnail()
+    {
+        $thumbnail = UploadedFile::fake()->image('user.jpg', 200, 200);
+        $data = [
+            'title'        => 'Sample Title',
+            'subtitle'     => 'Subtitle',
+            'thumbnail'    => $thumbnail,
+            'body'         => 'This is_datehe Description',
+            'publish_date' => 'a'
+        ];
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+        $response = $this->json('POST', '/api/posts', $data);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment([
+            'publish_date' => [
+                'The publish date field must be a valid date.',
+                'The publish date field must match the format Y-m-d.'
+            ],
+        ]);
+    }
+
+    public function test_invalid_publish_date_string_with_no_thumbnail()
+    {
+        $data = [
+            'title'        => 'Sample Title',
+            'subtitle'     => 'Subtitle',
+            'thumbnail'    => '',
+            'body'         => 'This is the Description',
+            'publish_date' => 'a'
+        ];
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+        $response = $this->json('POST', '/api/posts', $data);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment([
+            'publish_date' => [
+                'The publish date field must be a valid date.',
+                'The publish date field must match the format Y-m-d.'
+            ],
+        ]);
+    }
+
+    public function test_invalid_publish_date_not_Ymd_with_thumbnail()
+    {
+        $thumbnail = UploadedFile::fake()->image('user.jpg', 200, 200);
+        $data = [
+            'title'        => 'Sample Title',
+            'subtitle'     => 'Subtitle',
+            'thumbnail'    => $thumbnail,
+            'body'         => 'This is_datehe Description',
+            'publish_date' => '01-01-2024'
+        ];
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+        $response = $this->json('POST', '/api/posts', $data);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment([
+            'publish_date' => ['The publish date field must match the format Y-m-d.'],
+        ]);
+    }
+
+    public function test_invalid_publish_date_not_Ymd_with_no_thumbnail()
+    {
+        $data = [
+            'title'        => 'Sample Title',
+            'subtitle'     => 'Subtitle',
+            'thumbnail'    => '',
+            'body'         => 'This is the Description',
+            'publish_date' => '01-01-2024'
+        ];
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+        $response = $this->json('POST', '/api/posts', $data);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment([
+            'publish_date' => ['The publish date field must match the format Y-m-d.'],
+        ]);
+    }
 }

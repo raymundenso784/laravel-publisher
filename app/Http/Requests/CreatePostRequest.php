@@ -22,17 +22,22 @@ class CreatePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'     => ['required'],
-            'subtitle'  => [
+            'title'        => ['required'],
+            'subtitle'     => [
                 'nullable',
                 'string'
             ],
-            'thumbnail' => [
+            'thumbnail'    => [
                 'nullable',
                 'mimes:jpg,jpeg,png'
             ],
-            'body'      => ['required'],
-            'published' => ['in:1'],
+            'body'         => ['required'],
+            'published'    => ['in:1'],
+            'publish_date' => [
+                'nullable',
+                'date',
+                'date_format:Y-m-d'
+            ],
         ];
     }
 }
