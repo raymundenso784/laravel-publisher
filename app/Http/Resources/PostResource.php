@@ -26,7 +26,8 @@ class PostResource extends JsonResource
                 'last_name'  => $this->user->last_name,
                 'thumbnail'  => $this->user->thumbnail,
             ],
-            'thumbnail' => !is_null($this->file) ? $this->file->storage_file_path : null,
+            'thumbnail'    => !is_null($this->file) ? $this->file->storage_file_path : null,
+            'published'    => $this->published,
         ];
     }
 }

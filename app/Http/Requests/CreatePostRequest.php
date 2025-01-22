@@ -32,6 +32,7 @@ class CreatePostRequest extends FormRequest
                 'mimes:jpg,jpeg,png'
             ],
             'body'      => ['required'],
+            'published' => ['in:1'],
         ];
     }
 }

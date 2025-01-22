@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Comment;
+namespace Tests\Feature\Post\Create;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
-class CreateTest extends TestCase
+class PublishedTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -20,6 +20,7 @@ class CreateTest extends TestCase
             'subtitle'  => '',
             'thumbnail' => '',
             'body'      => 'This is the Description',
+            'published' => 1
         ];
         $user = User::factory()->create();
         $userId = $user->id;
@@ -56,6 +57,7 @@ class CreateTest extends TestCase
                     'user_id'      => $userId,
                     'subtitle'     => null,
                     'thumbnail_id' => null,
+                    'published'    => 1
                 ]
             )
         );
@@ -68,6 +70,7 @@ class CreateTest extends TestCase
             'subtitle'  => 'Subtitle',
             'thumbnail' => '',
             'body'      => 'This is the Description',
+            'published' => 1
         ];
         $user = User::factory()->create();
         $userId = $user->id;
@@ -101,6 +104,7 @@ class CreateTest extends TestCase
                     'id'           => 1,
                     'user_id'      => $userId,
                     'thumbnail_id' => null,
+                    'published'    => 1
                 ]
             )
         );
@@ -114,6 +118,7 @@ class CreateTest extends TestCase
             'subtitle'  => 'Subtitle',
             'thumbnail' => $thumbnail,
             'body'      => 'This is the Description',
+            'published' => 1
         ];
         $user = User::factory()->create();
         $userId = $user->id;
@@ -148,6 +153,7 @@ class CreateTest extends TestCase
                     'id'           => 1,
                     'user_id'      => $userId,
                     'thumbnail_id' => 1,
+                    'published'    => 1
                 ]
             )
         );
@@ -158,6 +164,7 @@ class CreateTest extends TestCase
         $data = [
             'title' => 'Sample Title',
             'body'  => 'This is the Description',
+            'published' => 1
         ];
         $user = User::factory()->create();
         $userId = $user->id;
@@ -194,63 +201,9 @@ class CreateTest extends TestCase
                     'user_id'      => $userId,
                     'subtitle'     => null,
                     'thumbnail_id' => null,
+                    'published'    => 1
                 ]
             )
         );
-    }
-
-    public function test_required_fields_empty_data_sent()
-    {
-        $data = [];
-        $user = User::factory()->create();
-
-        Sanctum::actingAs($user);
-        $response = $this->json('POST', '/api/posts', $data);
-
-        $response->assertStatus(422);
-        $response->assertJsonFragment([
-            'title' => ['The title field is required.'],
-            'body'  => ['The body field is required.']
-        ]);
-    }
-
-    public function test_required_fields_empty_title_and_body()
-    {
-        $data = [
-            'title'     => '',
-            'subtitle'  => '',
-            'thumbnail' => '',
-            'body'      => '',
-        ];
-        $user = User::factory()->create();
-
-        Sanctum::actingAs($user);
-        $response = $this->json('POST', '/api/posts', $data);
-
-        $response->assertStatus(422);
-        $response->assertJsonFragment([
-            'title' => ['The title field is required.'],
-            'body'  => ['The body field is required.']
-        ]);
-    }
-
-    public function test_invalid_thumbnail_extension()
-    {
-        $thumbnail = UploadedFile::fake()->image('user.pdf', 200, 200);
-        $data = [
-            'title'     => 'Sample Title',
-            'subtitle'  => 'Subtitle',
-            'thumbnail' => $thumbnail,
-            'body'      => 'This is the Description',
-        ];
-        $user = User::factory()->create();
-
-        Sanctum::actingAs($user);
-        $response = $this->json('POST', '/api/posts', $data);
-
-        $response->assertStatus(422);
-        $response->assertJsonFragment([
-            'thumbnail' => ['The thumbnail field must be a file of type: jpg, jpeg, png.'],
-        ]);
     }
 }

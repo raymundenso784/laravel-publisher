@@ -16,7 +16,7 @@ class PostController extends Controller
                 auth()->user()->id,
                 $request
             );
-
+            // dd($post);
             return new PostResource($post);
         } catch (\Throwable $th) {
             return ResponseJsonHelper::error($th->getMessage());

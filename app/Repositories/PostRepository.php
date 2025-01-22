@@ -14,6 +14,10 @@ class PostRepository {
 
     public function create(array $data)
     {
+        if(!isset($data['published'])) {
+            $data['published'] = 0;
+        }
+
         return $this->model->create($data);
     }
 }

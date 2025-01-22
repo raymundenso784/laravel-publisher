@@ -1,0 +1,208 @@
+<?php
+
+namespace Tests\Feature\Post\Create;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
+
+class UnpublishedTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_success_no_subtitle_and_thumbnail()
+    {
+        $data = [
+            'title'     => 'Sample Title',
+            'subtitle'  => '',
+            'thumbnail' => '',
+            'body'      => 'This is the Description',
+        ];
+        $user = User::factory()->create();
+        $userId = $user->id;
+
+        Sanctum::actingAs($user);
+        $response = $this->json('POST', '/api/posts', $data);
+
+        unset($data['thumbnail']);
+        $response->assertStatus(201);
+        $response->assertJsonFragment([
+            'data' => array_merge(
+                $data,
+                [
+                    'id'           => 1,
+                    'user_id'      => $userId,
+                    'subtitle'     => null,
+                    'thumbnail_id' => null,
+                    'author'       => [
+                        'first_name' => $user->first_name,
+                        'last_name'  => $user->last_name,
+                        'thumbnail'  => $user->thumbnail,
+                    ],
+                    'thumbnail'    => null,
+                    'published'    => 0
+                ],
+            ),
+        ]);
+        $this->assertDatabaseHas(
+            'posts',
+            array_merge(
+                $data,
+                [
+                    'id'           => 1,
+                    'user_id'      => $userId,
+                    'subtitle'     => null,
+                    'thumbnail_id' => null,
+                    'published'    => 0
+                ]
+            )
+        );
+    }
+
+    public function test_success_with_subtitle_and_no_thumbnail()
+    {
+        $data = [
+            'title'     => 'Sample Title',
+            'subtitle'  => 'Subtitle',
+            'thumbnail' => '',
+            'body'      => 'This is the Description',
+        ];
+        $user = User::factory()->create();
+        $userId = $user->id;
+
+        Sanctum::actingAs($user);
+        $response = $this->json('POST', '/api/posts', $data);
+
+        unset($data['thumbnail']);
+        $response->assertStatus(201);
+        $response->assertJsonFragment([
+            'data' => array_merge(
+                $data,
+                [
+                    'id'           => 1,
+                    'user_id'      => $userId,
+                    'thumbnail_id' => null,
+                    'author'       => [
+                        'first_name' => $user->first_name,
+                        'last_name'  => $user->last_name,
+                        'thumbnail'  => $user->thumbnail,
+                    ],
+                    'thumbnail'    => null,
+                    'published'    => 0
+                ],
+            ),
+        ]);
+        $this->assertDatabaseHas(
+            'posts',
+            array_merge(
+                $data,
+                [
+                    'id'           => 1,
+                    'user_id'      => $userId,
+                    'thumbnail_id' => null,
+                    'published'    => 0
+                ]
+            )
+        );
+    }
+
+    public function test_success_all_fields_filled()
+    {
+        $thumbnail = UploadedFile::fake()->image('user.jpeg', 200, 200);
+        $data = [
+            'title'     => 'Sample Title',
+            'subtitle'  => 'Subtitle',
+            'thumbnail' => $thumbnail,
+            'body'      => 'This is the Description',
+        ];
+        $user = User::factory()->create();
+        $userId = $user->id;
+
+        Storage::fake('local');
+        Sanctum::actingAs($user);
+        $response = $this->json('POST', '/api/posts', $data);
+
+        unset($data['thumbnail']);
+        $response->assertStatus(201);
+        $response->assertJsonFragment([
+            'data' => array_merge(
+                $data,
+                [
+                    'id'           => 1,
+                    'user_id'      => $userId,
+                    'thumbnail_id' => 1,
+                    'author'       => [
+                        'first_name' => $user->first_name,
+                        'last_name'  => $user->last_name,
+                        'thumbnail'  => $user->thumbnail,
+                    ],
+                    'thumbnail'    => $response->decodeResponseJson()['data']['thumbnail'],
+                    'published'    => 0
+                ],
+            ),
+        ]);
+        $this->assertDatabaseHas(
+            'posts',
+            array_merge(
+                $data,
+                [
+                    'id'           => 1,
+                    'user_id'      => $userId,
+                    'thumbnail_id' => 1,
+                    'published'    => 0
+                ]
+            )
+        );
+    }
+
+    public function test_success_title_and_body_only()
+    {
+        $data = [
+            'title' => 'Sample Title',
+            'body'  => 'This is the Description',
+        ];
+        $user = User::factory()->create();
+        $userId = $user->id;
+
+        Sanctum::actingAs($user);
+        $response = $this->json('POST', '/api/posts', $data);
+
+
+        unset($data['thumbnail']);
+        $response->assertStatus(201);
+        $response->assertJsonFragment([
+            'data' => array_merge(
+                $data,
+                [
+                    'id'           => 1,
+                    'user_id'      => $userId,
+                    'subtitle'     => null,
+                    'thumbnail_id' => null,
+                    'author'       => [
+                        'first_name' => $user->first_name,
+                        'last_name'  => $user->last_name,
+                        'thumbnail'  => $user->thumbnail,
+                    ],
+                    'thumbnail'    => null,
+                    'published'    => 0
+                ],
+            ),
+        ]);
+        $this->assertDatabaseHas(
+            'posts',
+            array_merge(
+                $data,
+                [
+                    'id'           => 1,
+                    'user_id'      => $userId,
+                    'subtitle'     => null,
+                    'thumbnail_id' => null,
+                    'published'    => 0
+                ]
+            )
+        );
+    }
+}
